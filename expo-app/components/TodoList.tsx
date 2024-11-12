@@ -1,13 +1,10 @@
 import { TodoItem } from '@/components/TodoItem';
-import { Todo } from '@/core/keelClient';
-import { Observable } from '@legendapp/state';
+import { todos$ } from '@/core/state';
 import { use$ } from '@legendapp/state/react';
 
-interface TodoListProps {
-    todos$: Observable<Todo[]>;
-}
+interface TodoListProps {}
 
-export const TodoList = ({ todos$ }: TodoListProps) => {
+export const TodoList = ({}: TodoListProps) => {
     const todos = use$(todos$);
 
     console.log('2 - TodoList');

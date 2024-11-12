@@ -1,15 +1,14 @@
 import { generateId } from '@/core/generateId';
 import { Todo } from '@/core/keelClient';
-import { Observable } from '@legendapp/state';
+import { todos$ } from '@/core/state';
 import { use$, useObservable } from '@legendapp/state/react';
 import { NativeSyntheticEvent, StyleSheet, TextInput, TextInputSubmitEditingEventData } from 'react-native';
 
 interface NewTodoProps {
     idUser: string;
-    todos$: Observable<Todo[]>;
 }
 
-export const NewTodo = ({ idUser, todos$ }: NewTodoProps) => {
+export const NewTodo = ({ idUser }: NewTodoProps) => {
     const text$ = useObservable('');
     const text = use$(text$);
 

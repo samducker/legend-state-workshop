@@ -1,7 +1,5 @@
 import { NewTodo } from '@/components/NewTodo';
 import { TodoList } from '@/components/TodoList';
-import { Todo } from '@/core/keelClient';
-import { useObservable } from '@legendapp/state/react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface TodosProps {
@@ -9,16 +7,13 @@ interface TodosProps {
 }
 
 export function Todos({ idUser }: TodosProps) {
-    // Create observable array of todos
-    const todos$ = useObservable<Todo[]>([]);
-
     console.log('1 - Todos');
 
     return (
         <View>
             <Text style={styles.heading}>Todos$</Text>
-            <NewTodo idUser={idUser} todos$={todos$} />
-            <TodoList todos$={todos$} />
+            <NewTodo idUser={idUser} />
+            <TodoList />
         </View>
     );
 }
