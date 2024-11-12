@@ -1,0 +1,24 @@
+model Todo {
+    fields {
+        text Text
+        idUser Text
+        completed Boolean? @default(false)
+        deleted Boolean? @default(false)
+    }
+
+    actions {
+        create createTodo() with (text, idUser)
+        list listTodos(idUser)
+        list listTodosWithUpdated(idUser, updatedAt?)
+        update updateTodo(id) with (text?, completed?)
+        delete deleteTodo(id)
+        update deleteTodoSoft(id) {
+            @set(todo.deleted = true)
+        }
+    }
+
+    @permission(
+        actions: [get, list, update, delete, create],
+        expression: true
+    )
+}

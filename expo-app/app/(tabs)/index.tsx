@@ -1,7 +1,10 @@
+import { Todos } from "@/components/Todos";
 import { generateId } from "@/core/generateId";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const { getItem, setItem } = useAsyncStorage("my_id");
@@ -21,17 +24,19 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <Text>Hi</Text>
-      </View>
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        {id && <Todos idUser={id} />}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 48,
+    flex: 1,
+  },
+  scrollView: {
     paddingHorizontal: 16,
   },
 });
