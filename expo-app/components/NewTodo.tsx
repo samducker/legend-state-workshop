@@ -1,8 +1,8 @@
 import { generateId } from '@/core/generateId';
 import { Todo } from '@/core/keelClient';
 import { todos$ } from '@/core/state';
-import { use$, useObservable } from '@legendapp/state/react';
-import { NativeSyntheticEvent, StyleSheet, TextInput, TextInputSubmitEditingEventData } from 'react-native';
+import { $, useObservable } from '@legendapp/state/react';
+import { NativeSyntheticEvent, StyleSheet, TextInputSubmitEditingEventData } from 'react-native';
 
 interface NewTodoProps {
     idUser: string;
@@ -10,7 +10,6 @@ interface NewTodoProps {
 
 export const NewTodo = ({ idUser }: NewTodoProps) => {
     const text$ = useObservable('');
-    const text = use$(text$);
 
     const addTodo = (text: string) => {
         todos$.push({
@@ -23,17 +22,16 @@ export const NewTodo = ({ idUser }: NewTodoProps) => {
         } as Todo);
     };
 
-    const handleSubmitEditing = ({ nativeEvent: { text } }: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
+    const handleSubmitEditing = () => {
+        addTodo(text$.get());
         text$.set('');
-        addTodo(text);
     };
 
     console.log('4 - NewTodo');
 
     return (
-        <TextInput
-            value={text}
-            onChangeText={(text) => text$.set(text)}
+        <$.TextInput
+            $value={text$}
             onSubmitEditing={handleSubmitEditing}
             placeholder="What do you want to do?"
             style={styles.input}
