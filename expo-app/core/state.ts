@@ -3,7 +3,7 @@ import { APIClient, Todo } from '@/core/keelClient';
 import { observable, syncState, when } from '@legendapp/state';
 import { observablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
 import { configureSynced, synced } from '@legendapp/state/sync';
-import { syncedKeel } from '@legendapp/state/sync-plugins/keel';
+import { KeelListParams, syncedKeel } from '@legendapp/state/sync-plugins/keel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Setup AsyncStorage plugin with the specific implementation
@@ -52,15 +52,21 @@ const sync = configureSynced(syncedKeel, {
     client: keel,
     persist: {
         plugin: pluginAsyncStorage,
+        retrySync: true,
     },
     requireAuth: false,
     waitFor: user$.id,
     as: 'object',
+    retry: {
+        infinite: true,
+    },
+    mode: 'merge',
+    changesSince: 'last-sync',
 });
 
 export const store$ = observable({
     users: sync({
-        list: () => queries.listUsers(),
+        list: ({ where: { updatedAt } }) => queries.listUsers({ updatedAt: updatedAt?.after }),
         persist: {
             name: 'users',
         },
@@ -68,7 +74,7 @@ export const store$ = observable({
     user: (idUser: string) => ({
         todos: sync({
             initial: {} as Record<string, Todo>,
-            list: () => queries.listTodos({ where: { idUser: { equals: idUser } } }),
+            list: ({ where }: KeelListParams) => queries.listTodos({ where: { ...where, idUser: { equals: idUser } } }),
             create: mutations.createTodo,
             update: mutations.updateTodo,
             delete: mutations.deleteTodo,
