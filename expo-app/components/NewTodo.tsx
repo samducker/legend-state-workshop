@@ -2,7 +2,7 @@ import { generateId } from '@/core/generateId';
 import { Todo } from '@/core/keelClient';
 import { todos$ } from '@/core/state';
 import { $, useObservable } from '@legendapp/state/react';
-import { NativeSyntheticEvent, StyleSheet, TextInputSubmitEditingEventData } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 interface NewTodoProps {
     idUser: string;
@@ -12,8 +12,9 @@ export const NewTodo = ({ idUser }: NewTodoProps) => {
     const text$ = useObservable('');
 
     const addTodo = (text: string) => {
-        todos$.push({
-            id: generateId(),
+        const id = generateId();
+        todos$[id].set({
+            id,
             text,
             idUser: idUser,
             completed: false,
