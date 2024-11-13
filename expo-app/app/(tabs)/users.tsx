@@ -1,9 +1,12 @@
+import { store$ } from '@/core/state';
+import { use$ } from '@legendapp/state/react';
 import { Link } from 'expo-router';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function UsersList() {
-    const usersArr: any[] = [];
+    const users = use$(store$.users);
+    const usersArr = Object.values(users || {});
 
     return usersArr.map((user) => (
         <Link key={user.id} href={`/user/${user.id}`} style={styles.user}>

@@ -4,15 +4,16 @@ import { StyleSheet, Text, View } from 'react-native';
 
 interface TodosProps {
     idUser: string;
+    isSelf: boolean;
 }
 
-export function Todos({ idUser }: TodosProps) {
+export function Todos({ idUser, isSelf }: TodosProps) {
     console.log('1 - Todos');
 
     return (
         <View>
             <Text style={styles.heading}>Todos$</Text>
-            <NewTodo idUser={idUser} />
+            {isSelf && <NewTodo idUser={idUser} />}
             <TodoList idUser={idUser} />
         </View>
     );

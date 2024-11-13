@@ -11,7 +11,7 @@ export default function HomeScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.scrollView}>{id && <Todos idUser={id} />}</ScrollView>
+            <ScrollView style={styles.scrollView}>{id && <Todos idUser={id} isSelf />}</ScrollView>
         </SafeAreaView>
     );
 }
