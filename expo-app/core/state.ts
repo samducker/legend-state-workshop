@@ -1,5 +1,5 @@
 import { generateId } from '@/core/generateId';
-import { APIClient, Todo } from '@/core/keelClient';
+import { APIClient, Priority, ServerStatus, Todo } from '@/core/keelClient';
 import { observable, syncState, when } from '@legendapp/state';
 import { observablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
 import { configureSynced, synced } from '@legendapp/state/sync';
@@ -47,7 +47,22 @@ const keel = new APIClient({
 
 const { queries, mutations } = keel.api;
 
-// Setup todos$
+const serverStatus$ = observable<ServerStatus>(
+    syncedKeel({
+        client: keel,
+        get: queries.getServerStatus,
+        requireAuth: false,
+        retry: {
+            infinite: true,
+        },
+    }),
+);
+
+const isServerVersionSupported = () => {
+    const minVersion = serverStatus$.minimumVersion.get();
+    return minVersion >= 0 && minVersion <= 1;
+};
+
 const sync = configureSynced(syncedKeel, {
     client: keel,
     persist: {
@@ -55,7 +70,7 @@ const sync = configureSynced(syncedKeel, {
         retrySync: true,
     },
     requireAuth: false,
-    waitFor: user$.id,
+    waitFor: () => user$.id.get() && isServerVersionSupported(),
     as: 'object',
     retry: {
         infinite: true,
@@ -80,6 +95,19 @@ export const store$ = observable({
             delete: mutations.deleteTodo,
             persist: {
                 name: 'todos' + idUser,
+                transform: {
+                    load(value: Record<string, Todo>, method) {
+                        if (method === 'get') {
+                            Object.values(value).forEach((todo) => {
+                                if (todo.oldIsPriority) {
+                                    todo.newPriority = todo.oldIsPriority ? Priority.High : Priority.None;
+                                    delete (todo as Partial<Todo>).oldIsPriority;
+                                }
+                            });
+                        }
+                        return value;
+                    },
+                },
             },
         }),
         todosSorted: (): Todo[] =>
