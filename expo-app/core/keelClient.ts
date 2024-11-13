@@ -1,4 +1,3 @@
-// @ts-nocheck
 // GENERATED DO NOT EDIT
 
 type RequestHeaders = globalThis.Record<string, string>;
@@ -289,12 +288,14 @@ export class Core {
         /**
          * Get or set the access token from the configured token store.
          */
-        accessToken: this.config.accessTokenStore || new InMemoryStore(),
+        // @ts-ignore
+        accessToken: this.config?.accessTokenStore || new InMemoryStore(),
 
         /**
          * Get or set the refresh token from the configured token store.
          */
-        refreshToken: this.config.refreshTokenStore || new InMemoryStore(),
+        // @ts-ignore
+        refreshToken: this.config?.refreshTokenStore || new InMemoryStore(),
 
         /**
          * Returns data field set to the list of supported authentication providers and their SSO login URLs.
@@ -638,20 +639,8 @@ export class APIClient extends Core {
     }
 
     private actions = {
-        createTodo: (i: CreateTodoInput) => {
-            return this.client.rawRequest<Todo>('createTodo', i);
-        },
-        listTodos: (i: ListTodosInput) => {
-            return this.client.rawRequest<{ results: Todo[]; pageInfo: PageInfo }>('listTodos', i);
-        },
-        listTodosWithUpdated: (i: ListTodosWithUpdatedInput) => {
-            return this.client.rawRequest<{ results: Todo[]; pageInfo: PageInfo }>('listTodosWithUpdated', i);
-        },
-        updateTodo: (i: UpdateTodoInput) => {
-            return this.client.rawRequest<Todo>('updateTodo', i);
-        },
-        deleteTodo: (i: DeleteTodoInput) => {
-            return this.client.rawRequest<string>('deleteTodo', i);
+        getServerStatus: (i?: GetServerStatusInput) => {
+            return this.client.rawRequest<ServerStatusReturn>('getServerStatus', i);
         },
         requestPasswordReset: (i: RequestPasswordResetInput) => {
             return this.client.rawRequest<RequestPasswordResetResponse>('requestPasswordReset', i);
@@ -659,25 +648,51 @@ export class APIClient extends Core {
         resetPassword: (i: ResetPasswordInput) => {
             return this.client.rawRequest<ResetPasswordResponse>('resetPassword', i);
         },
+        createTodo: (i?: CreateTodoInput) => {
+            return this.client.rawRequest<Todo>('createTodo', i);
+        },
+        listTodos: (i: ListTodosInput) => {
+            return this.client.rawRequest<{ results: Todo[]; pageInfo: PageInfo }>('listTodos', i);
+        },
+        updateTodo: (i: UpdateTodoInput) => {
+            return this.client.rawRequest<Todo>('updateTodo', i);
+        },
+        deleteTodo: (i: DeleteTodoInput) => {
+            return this.client.rawRequest<string>('deleteTodo', i);
+        },
+        deleteTodoSoft: (i: DeleteTodoSoftInput) => {
+            return this.client.rawRequest<Todo>('deleteTodoSoft', i);
+        },
+        listUsers: (i?: ListUsersInput) => {
+            return this.client.rawRequest<UsersReturn>('listUsers', i);
+        },
     };
 
     api = {
         queries: {
+            getServerStatus: this.actions.getServerStatus,
             listTodos: this.actions.listTodos,
-            listTodosWithUpdated: this.actions.listTodosWithUpdated,
+            listUsers: this.actions.listUsers,
         },
         mutations: {
+            requestPasswordReset: this.actions.requestPasswordReset,
+            resetPassword: this.actions.resetPassword,
             createTodo: this.actions.createTodo,
             updateTodo: this.actions.updateTodo,
             deleteTodo: this.actions.deleteTodo,
-            requestPasswordReset: this.actions.requestPasswordReset,
-            resetPassword: this.actions.resetPassword,
+            deleteTodoSoft: this.actions.deleteTodoSoft,
         },
     };
 }
 
 // API Types
 
+export interface ServerStatusReturn {
+    id: string;
+    minimumVersion: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
 export interface RequestPasswordResetInput {
     email: string;
     redirectUrl: string;
@@ -688,9 +703,23 @@ export interface ResetPasswordInput {
     password: string;
 }
 export interface ResetPasswordResponse {}
+export interface User {
+    id: string;
+    updatedAt?: Date;
+}
+export interface Users {
+    users: User[];
+}
+export interface UsersReturn {
+    results: User[];
+}
+export interface GetServerStatusInput {}
 export interface CreateTodoInput {
-    text: string;
-    idUser: string;
+    id?: string;
+    text?: string;
+    idUser?: string;
+    completed?: boolean | null;
+    deleted?: boolean | null;
 }
 export interface StringQueryInput {
     equals?: string | null;
@@ -700,26 +729,16 @@ export interface StringQueryInput {
     contains?: string;
     oneOf?: string[];
 }
-export interface ListTodosWhere {
-    idUser: StringQueryInput;
-}
-export interface ListTodosInput {
-    where: ListTodosWhere;
-    first?: number;
-    after?: string;
-    last?: number;
-    before?: string;
-}
 export interface TimestampQueryInput {
     before?: Date;
     after?: Date;
 }
-export interface ListTodosWithUpdatedWhere {
+export interface ListTodosWhere {
     idUser: StringQueryInput;
     updatedAt?: TimestampQueryInput;
 }
-export interface ListTodosWithUpdatedInput {
-    where: ListTodosWithUpdatedWhere;
+export interface ListTodosInput {
+    where: ListTodosWhere;
     first?: number;
     after?: string;
     last?: number;
@@ -730,7 +749,9 @@ export interface UpdateTodoWhere {
 }
 export interface UpdateTodoValues {
     text?: string;
-    completed?: boolean;
+    completed?: boolean | null;
+    idUser?: string;
+    deleted?: boolean | null;
 }
 export interface UpdateTodoInput {
     where: UpdateTodoWhere;
@@ -739,10 +760,39 @@ export interface UpdateTodoInput {
 export interface DeleteTodoInput {
     id: string;
 }
-export interface Todo {
-    text: string;
-    idUser: string;
-    completed?: boolean;
+export interface DeleteTodoSoftWhere {
+    id: string;
+}
+export interface DeleteTodoSoftValues {}
+export interface DeleteTodoSoftInput {
+    where: DeleteTodoSoftWhere;
+    values?: DeleteTodoSoftValues;
+}
+export interface ListUsersInput {
+    updatedAt?: Date;
+}
+export enum Priority {
+    None = 'None',
+    Low = 'Low',
+    Medium = 'Medium',
+    High = 'High',
+}
+export interface PriorityWhereCondition {
+    equals?: Priority | null;
+    oneOf?: Priority[] | null;
+}
+export interface PriorityArrayWhereCondition {
+    equals?: Priority[] | null;
+    notEquals?: Priority[] | null;
+    any?: PriorityArrayQueryWhereCondition | null;
+    all?: PriorityArrayQueryWhereCondition | null;
+}
+export interface PriorityArrayQueryWhereCondition {
+    equals?: Priority | null;
+    notEquals?: Priority | null;
+}
+export interface ServerStatus {
+    minimumVersion: number;
     id: string;
     createdAt: Date;
     updatedAt: Date;
@@ -764,6 +814,17 @@ export interface Identity {
     gender: string | null;
     zoneInfo: string | null;
     locale: string | null;
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+export interface Todo {
+    text: string;
+    idUser: string;
+    completed: boolean | null;
+    deleted: boolean | null;
+    oldIsPriority: boolean | null;
+    newPriority: Priority | null;
     id: string;
     createdAt: Date;
     updatedAt: Date;
