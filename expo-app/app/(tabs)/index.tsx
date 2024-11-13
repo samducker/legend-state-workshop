@@ -23,6 +23,8 @@ export default function HomeScreen() {
         });
     }, []);
 
+    console.log('6 - Home screen');
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.scrollView}>{id && <Todos idUser={id} />}</ScrollView>
