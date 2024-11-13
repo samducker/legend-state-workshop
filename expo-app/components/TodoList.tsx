@@ -8,5 +8,7 @@ interface TodoListProps {
 }
 
 export const TodoList = ({ todos, updateTodo, deleteTodo }: TodoListProps) => {
+    console.log('2 - TodoList');
+
     return todos.map((todo) => <TodoItem key={todo.id} todo={todo} updateTodo={updateTodo} deleteTodo={deleteTodo} />);
 };

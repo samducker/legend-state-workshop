@@ -21,7 +21,7 @@ export function Todos(props: TodosProps) {
                 completed: false,
                 createdAt: new Date(),
                 updatedAt: new Date(),
-            },
+            } as Todo,
         ]);
     };
     const updateTodo = (todo: Todo) => {
@@ -30,6 +30,9 @@ export function Todos(props: TodosProps) {
     const deleteTodo = (id: string) => {
         setTodos(todos.filter((t) => t.id !== id));
     };
+
+    console.log('1 - Todos');
+
     return (
         <View>
             <Text style={styles.heading}>Todos</Text>

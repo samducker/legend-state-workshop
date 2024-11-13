@@ -24,6 +24,8 @@ export const TodoItem = ({
         deleteTodo(todo.id);
     };
 
+    console.log('3 - TodoItem');
+
     return (
         <View style={[styles.todo, completed && styles.viewDone]}>
             <TextInput
@@ -33,7 +35,7 @@ export const TodoItem = ({
                 onChangeText={onChangeText}
                 blurOnSubmit
             />
-            <Checkbox value={todo.completed} style={styles.checkbox} onValueChange={onToggle} />
+            <Checkbox value={todo.completed || false} style={styles.checkbox} onValueChange={onToggle} />
             <Ionicons name="trash" size={24} color="red" style={styles.deleteButton} onPress={onPressDelete} />
         </View>
     );

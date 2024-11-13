@@ -11,6 +11,9 @@ export const NewTodo = ({ addTodo }: NewTodoProps) => {
         setText('');
         addTodo(text);
     };
+
+    console.log('4 - NewTodo');
+
     return (
         <TextInput
             value={text}
