@@ -1,5 +1,5 @@
 import { generateId } from '@/core/generateId';
-import { todos$ } from '@/core/state';
+import { store$ } from '@/core/state';
 import { $, useObservable } from '@legendapp/state/react';
 import { StyleSheet } from 'react-native';
 
@@ -12,7 +12,7 @@ export const NewTodo = ({ idUser }: NewTodoProps) => {
 
     const addTodo = (text: string) => {
         const id = generateId();
-        todos$[id].assign({
+        store$.user[idUser].todos[id].assign({
             id,
             text,
             idUser: idUser,

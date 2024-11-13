@@ -2,7 +2,7 @@ import { generateId } from '@/core/generateId';
 import { APIClient, Todo } from '@/core/keelClient';
 import { observable, syncState, when } from '@legendapp/state';
 import { observablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
-import { synced } from '@legendapp/state/sync';
+import { configureSynced, synced } from '@legendapp/state/sync';
 import { syncedKeel } from '@legendapp/state/sync-plugins/keel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -48,30 +48,37 @@ const keel = new APIClient({
 const { queries, mutations } = keel.api;
 
 // Setup todos$
-export const todos$ = observable<Record<string, Todo>>(
-    syncedKeel({
-        client: keel,
-        initial: {} as Record<string, Todo>,
-        list: () => queries.listTodos({ where: { idUser: { equals: user$.id.get() } } }),
-        create: mutations.createTodo,
-        update: mutations.updateTodo,
-        delete: mutations.deleteTodo,
-        requireAuth: false,
-        waitFor: user$.id,
-        as: 'object',
+const sync = configureSynced(syncedKeel, {
+    client: keel,
+    persist: {
+        plugin: pluginAsyncStorage,
+    },
+    requireAuth: false,
+    waitFor: user$.id,
+    as: 'object',
+});
+
+export const store$ = observable({
+    users: sync({
+        list: () => queries.listUsers(),
         persist: {
-            plugin: pluginAsyncStorage,
-            name: 'todos',
+            name: 'users',
         },
     }),
-);
-
-// A sorted list of todos
-export const todosSorted$ = observable<Todo[]>(() =>
-    Object.values(todos$.get()).sort((A, B) => +A.createdAt - +B.createdAt),
-);
-
-// numIncompleteTodos$ helper
-export const numIncompleteTodos$ = observable(
-    () => Object.values(todos$.get()).filter((todo) => !todo.completed).length,
-);
+    user: (idUser: string) => ({
+        todos: sync({
+            initial: {} as Record<string, Todo>,
+            list: () => queries.listTodos({ where: { idUser: { equals: idUser } } }),
+            create: mutations.createTodo,
+            update: mutations.updateTodo,
+            delete: mutations.deleteTodo,
+            persist: {
+                name: 'todos' + idUser,
+            },
+        }),
+        todosSorted: (): Todo[] =>
+            Object.values(store$.user[idUser].todos.get()).sort((A, B) => +A.createdAt - +B.createdAt),
+        numIncompleteTodos: () =>
+            Object.values(store$.user[idUser].todos.get()).filter((todo) => !todo.completed).length,
+    }),
+});

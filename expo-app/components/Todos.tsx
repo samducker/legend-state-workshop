@@ -13,7 +13,7 @@ export function Todos({ idUser }: TodosProps) {
         <View>
             <Text style={styles.heading}>Todos$</Text>
             <NewTodo idUser={idUser} />
-            <TodoList />
+            <TodoList idUser={idUser} />
         </View>
     );
 }

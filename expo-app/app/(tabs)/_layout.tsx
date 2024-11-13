@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import { numIncompleteTodos$ } from '@/core/state';
+import { store$, user$ } from '@/core/state';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TabBarIcon } from '@/ui/TabBarIcon';
 import { use$, useObserve } from '@legendapp/state/react';
@@ -10,6 +10,8 @@ import { Platform } from 'react-native';
 export default function TabLayout() {
     const colorScheme = useColorScheme();
 
+    const idMe = use$(user$.id);
+    const numIncompleteTodos$ = store$.user[idMe].numIncompleteTodos;
     const numIncompleteTodos = use$(numIncompleteTodos$);
 
     if (Platform.OS === 'web') {
