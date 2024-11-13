@@ -3,7 +3,7 @@ import { TodoList } from '@/components/TodoList';
 import { generateId } from '@/core/generateId';
 import { Todo } from '@/core/keelClient';
 import { useState } from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 interface TodosProps {
     idUser: string;
