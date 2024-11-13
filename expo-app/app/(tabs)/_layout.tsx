@@ -1,15 +1,22 @@
 import { Colors } from '@/constants/Colors';
-import { todos$ } from '@/core/state';
+import { numIncompleteTodos$ } from '@/core/state';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { TabBarIcon } from '@/ui/TabBarIcon';
-import { use$ } from '@legendapp/state/react';
+import { use$, useObserve } from '@legendapp/state/react';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
 
-    const todos = use$(todos$);
+    const numIncompleteTodos = use$(numIncompleteTodos$);
+
+    if (Platform.OS === 'web') {
+        useObserve(() => {
+            document.title = `Todos (${numIncompleteTodos$.get()})`;
+        });
+    }
 
     console.log('5 - TabLayout');
 
@@ -27,7 +34,7 @@ export default function TabLayout() {
                     tabBarIcon: ({ color, focused }) => (
                         <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
                     ),
-                    tabBarBadge: todos.length,
+                    tabBarBadge: numIncompleteTodos || undefined,
                 }}
             />
             <Tabs.Screen

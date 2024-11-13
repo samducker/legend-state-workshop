@@ -5,7 +5,7 @@ import { use$ } from '@legendapp/state/react';
 interface TodoListProps {}
 
 export const TodoList = ({}: TodoListProps) => {
-    const todos = use$(todos$);
+    const todos = use$(todos$, { shallow: true });
 
     console.log('2 - TodoList');
 
