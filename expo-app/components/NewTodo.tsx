@@ -1,13 +1,28 @@
+import { generateId } from '@/core/generateId';
+import { Todo } from '@/core/keelClient';
+import { Observable } from '@legendapp/state';
 import { use$, useObservable } from '@legendapp/state/react';
 import { NativeSyntheticEvent, StyleSheet, TextInput, TextInputSubmitEditingEventData } from 'react-native';
 
 interface NewTodoProps {
-    addTodo: (text: string) => void;
+    idUser: string;
+    todos$: Observable<Todo[]>;
 }
 
-export const NewTodo = ({ addTodo }: NewTodoProps) => {
+export const NewTodo = ({ idUser, todos$ }: NewTodoProps) => {
     const text$ = useObservable('');
     const text = use$(text$);
+
+    const addTodo = (text: string) => {
+        todos$.push({
+            id: generateId(),
+            text,
+            idUser: idUser,
+            completed: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        } as Todo);
+    };
 
     const handleSubmitEditing = ({ nativeEvent: { text } }: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
         text$.set('');
