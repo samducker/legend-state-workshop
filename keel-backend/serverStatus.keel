@@ -1,0 +1,18 @@
+model ServerStatus {
+    fields {
+        minimumVersion Number @default(2)
+    }
+
+    actions {
+        read getServerStatus() returns (ServerStatusReturn) {
+            @permission(expression: true)
+        }
+    }
+}
+
+message ServerStatusReturn {
+    id Text
+    minimumVersion Number
+    createdAt Timestamp
+    updatedAt Timestamp
+}
