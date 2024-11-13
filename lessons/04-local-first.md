@@ -155,6 +155,7 @@ Add transformation logic for handling schema changes. A new client update may lo
 +                                }
 +                            });
 +                        }
++                        return value;
 +                    },
 +                },
              },
