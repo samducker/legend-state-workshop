@@ -5,7 +5,7 @@ transition: none
 mdc: true
 defaults:
     layout: center
-    transition: slide-up
+    transition: view-transition
 ---
 
 # Building high performance local-first
@@ -23,9 +23,13 @@ Hi I'm Jay!
 
 I'm here to talk to you about performance, sync engines, and Legend State.
 
+Who here has used Legend State before?
+
+Would you consider yourself new or advanced? Keep your hands raised if advanced.
+
 Feel free to raise your hand at any time or yell out Question if I don't see you.
 
-First a bit about me.
+First a bit about me and an intro and history of Legend State.
 -->
 
 ---
@@ -35,7 +39,7 @@ First a bit about me.
 </div>
 
 <!--
-I started my career as a game developer, working on a Nintendo Wii game at EA Games
+I started my career as a game developer, working in C++ on a Nintendo Wii game at EA Games. I learned a lot about performance with the constrained processing of the Wii.
 -->
 
 ---
@@ -45,7 +49,9 @@ I started my career as a game developer, working on a Nintendo Wii game at EA Ga
 </div>
 
 <!--
-Then I went to Microsoft and worked on Windows 7, Windows 8, Windows Phone, Xbox, and Surface. Then I got into web development in 2011, React in 2015, and React Native in 2017. So I've been deep in React land for a while.
+Then I went to Microsoft and worked on Windows 7, Windows 8, Windows Phone, Xbox, Kinect, and Surface. I learned about the crazy performance requirements of developing OS code and also did some some computer vision and communicating directly with hardware.
+
+Then I got into web development in 2011, React in 2015, and React Native in 2017. So I've been deep in React land for a while. In JavaScript do performance... differently.
 -->
 
 ---
@@ -80,12 +86,10 @@ Some users have millions of items that need to be filtered and sorted as you typ
 <!--
 I'm also working on Bravely, a platform for therapists to run their practice and collaborate with their clients. It also has a ton of data.
 
-Clinics have dozens of therapists, each with dozens of clients, all managing appointments and session notes and invoices.
+Clinics have dozens of therapists, each with dozens of clients, all managing appointments and session notes and invoices. And healthcare data has some really intense security and privacy requirements.
 -->
 
 ---
-
-## transition: view-transition
 
 # Holy Grail App {.inline-block.view-transition-holy-grail}
 
@@ -158,7 +162,7 @@ So first, the most important thing to focus on to make your apps really fast is 
 ## Render less, less often
 
 <!--
-Just do less work. Rendering is very expensive. It involves creating a bunch of memory creating all the elements and rendering them to a virtual DOM, then reconciling and diffing the virtual DOM against the previous state, then rendering the results to the app.
+Just do less work. Rendering is very expensive. It involves creating a bunch of memory creating all the elements and rendering them to a virtual DOM, then reconciling and diffing the virtual DOM against the previous state, then rendering native views.
 
 Your code might also do a bunch of computations while rendering, but that's actually usually much less than the render itself.
 
@@ -192,16 +196,19 @@ The useState hook is easy, we set a new state and it re-renders.
 ````md magic-move
 ```js
 const state = useState({ name: 'Hello', other: {} });
+
 setState({ ...state, name: 'Annyong' });
 ```
 
 ```js
 const state = useState({ name: 'Hello', array: ['banana'] });
+
 setState({ ...state, name: 'Annyong' });
 ```
 
 ```js
 const array = useState(['banana']);
+
 setState([...array, 'chocolate']);
 ```
 ````
@@ -216,9 +223,9 @@ But that actually has a big problem.
 
 It uses strict equality checking to know if state changed. So we have to create an entirely new object.
 
-And it can get weird if you depend on children changing. Since this spreads the state it keeps the same array reference so it's unchanged. That might be what you want? Or you might need a deep clone. It's confusing.
+2. And it can get weird if you depend on children changing. Since this spreads the state it keeps the same array reference so it's unchanged. That might be what you want? Or you might need a deep clone. It's confusing.
 
-It's also silly with arrays. You just want to push an element but you have to create a whole new array with one new element.
+3. It's also silly with arrays. You just want to push an element but you have to create a whole new array with one new element.
 
 But that's terrible for performance because it's constantly creating new memory and garbage collecting it. And garbage collecting freezes the app. So we want to avoid immutability.
 
@@ -233,7 +240,9 @@ And it's a super blunt instrument, changing anything in the state will re-render
 const [state, dispatch] = useReducer(reducer, initialArg, init?)
 ```
 
-1. <span class="text-4xl">WAT 😱</span>
+<br />
+
+1. <span class="text-2xl">WAT 😱</span>
 
 <!--
 The other builtin for state is useReducer. But what even is it? It's super confusing. And it has basically all of the same issues as useState so we don't need to get into it.
@@ -241,10 +250,9 @@ The other builtin for state is useReducer. But what even is it? It's super confu
 
 ---
 
-### ❌ Context
+## ❌ Context
 
-````md magic-move
-```js
+```tsx
 const store = { user: { name: 'Annyong' }, settings: {} };
 
 function Component() {
@@ -254,25 +262,12 @@ function Component() {
 }
 ```
 
-```js
-const store = { user: { name: 'Annyong' }, settings: {} };
-
-function Component() {
-    const { user } = useStore(store);
-
-    return <Text>{user.name}</Text>;
-}
-```
-````
+<br />
 
 1. Not fine-grained
 
 <!--
 And then we have context. Context has a big problem: whenever anything changes it re-renders every subscriber. So if settings changes, this component will re-render even though it doesn't use settings.
-
-2. Some state libraries use a similar pattern, subscribing to a whole store for changes. And it has the same problem: using one store or one context will get very slow as your app scales.
-
-These are fine for small, rarely changing, or rarely consumed state. But if you're putting a lot of state in context, it's going to re-render a ton and you're going to have a bad time.
 -->
 
 ---
@@ -301,8 +296,32 @@ function App() {
 
 <!--
 The solution to that is to split into multiple contexts, but that gets terrible too.
+-->
 
-So we want our updates to be more fine-grained.
+---
+
+## ❌ useStore
+
+```tsx
+const store = { user: { name: 'Annyong' }, settings: {} };
+
+function Component() {
+    const { user } = useStore(store);
+
+    return <Text>{user.name}</Text>;
+}
+```
+
+<br />
+
+1. Not fine-grained
+
+<!--
+Some state libraries use a similar pattern, subscribing to a whole store for changes. And it has the same problem: using one store or one context will get very slow as your app scales.
+
+These are fine for small, rarely changing, or rarely consumed state. But if you're putting a lot of state in context, it's going to re-render a ton and you're going to have a bad time.
+
+So we want more fine-grained updates
 -->
 
 ---
@@ -320,6 +339,8 @@ function signal(value) {
 }
 ```
 
+<br />
+
 1. No hierarchy
 
 <!--
@@ -332,7 +353,7 @@ So we need some kind of hierarchical signal.
 
 ---
 
-### ❌ defineProperty
+## ❌ defineProperty
 
 ````md magic-move
 ```js
@@ -400,6 +421,8 @@ Object.keys(user).forEach(key => {
 ```
 ````
 
+<br />
+
 1. Slow
 2. Recreate hidden when changed
 
@@ -417,7 +440,7 @@ Some state libraries use defineProperty to intercept property access.
 
 ---
 
-### ❌ Proxy
+## ❌ Proxy
 
 ```js
 const user = { profile: { name: 'Annyong' }}
@@ -436,6 +459,8 @@ const user$ = new Proxy(
 )
 ```
 
+<br />
+
 1. Recreate when changed
 
 <!--
@@ -446,7 +471,7 @@ It's not as slow as defineProperty but it has the same problem that we have to r
 
 ---
 
-### ❌ Snapshot Proxy
+## ❌ Snapshot Proxy
 
 ```js
 function useSnapshot(state) {
@@ -465,6 +490,8 @@ function Component() {
 }
 ```
 
+<br />
+
 1. Creating new Proxies during render
 2. Hook for each state object
 
@@ -476,7 +503,7 @@ But then that hook is creating a whole new tree of Proxies whenever it's called,
 
 ---
 
-### ❌ Hacking React
+## ❌ Hacking React
 
 ```js
 import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED as Internals } from 'react';
@@ -493,6 +520,8 @@ const user$ = new Proxy(user, {
 });
 ```
 
+<br />
+
 1. Unreliable
 2. Broken by React update
 
@@ -500,6 +529,8 @@ const user$ = new Proxy(user, {
 We could go a little crazy and hack up React's internals to know which component is currently rendering.
 
 Then we don't need any hooks, because state access is tracked automatically. I tried this, and it was really cool and worked in development, but it was super unreliable in production. And an update to React could easily break it, so that's a no-go.
+
+Most popular state libraries out there use one of those techniques.
 
 ?? &nbsp;&nbsp;&nbsp;&nbsp;   So how are we, any questions so far?
 -->
@@ -625,7 +656,7 @@ Normally we'd Proxy an object to track property access. So by accessing name wit
 
 4. Then we can have a get function that tracks and returns the actual value at that node.
 
-5. And that's basically how Legend State works. Observers track get() calls and re-render when those values change. &nbsp;&nbsp;?? &nbsp;&nbsp;&nbsp;   Any questions before I go on?
+And that's basically how Legend State works. Observers track get() calls and re-render when those values change. &nbsp;&nbsp;?? &nbsp;&nbsp;&nbsp;   Any questions before I go on?
 -->
 
 ---
@@ -650,26 +681,6 @@ function Component() {
 So we can be very specific about which fields we access, so that we subscribe to the minimal changes we actually need.
 
 We can use an observable directly, or give it a function to observe all get() calls.
-
-But anyway,
--->
-
----
-
-## Fine grained rendering
-
-<div>
-    <video src="/media/finegrained.mp4" autoplay loop muted class="rounded"></video>
-</div>
-
-<!--
-That specific tracking lets us do really fine-grained rendering.
-
-We can see why that's good with some flashing boxes every time an element renders.
-
-In the regular React version on the left, every time count changes, everything re-renders.
-
-In the observable version on the right, it re-renders only the tiniest element that actually changed.
 -->
 
 ---
@@ -697,7 +708,31 @@ interface Change {
 But we have more information than just that it changed. We know the path of the child within the hierarchy and the details of that change.
 
 So it can notify only the nodes that actually changed with the exact details of the change. And that lets us build a whole sync engine on it. But we'll get there later today :).
+-->
 
+---
+
+## Fine grained rendering
+
+<div>
+    <video src="/media/finegrained.mp4" autoplay loop muted class="rounded"></video>
+</div>
+
+<!--
+That specific tracking lets us do really fine-grained rendering.
+
+We can see why that's good with some flashing boxes every time an element renders.
+
+In the regular React version on the left, every time count changes, everything re-renders.
+
+In the observable version on the right, it re-renders only the tiniest element that actually changed.
+-->
+
+---
+
+# <span class="questionBox">?</span>
+
+<!--
 So, any questions so far?
 
 Let's get into building an app with Legend State.
