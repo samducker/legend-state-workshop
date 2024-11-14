@@ -1,14 +1,44 @@
 import { Todo } from '@/core/keelClient';
-import { observable } from '@legendapp/state';
+import { observable, syncState, when } from '@legendapp/state';
+import { observablePersistAsyncStorage } from '@legendapp/state/persist-plugins/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { generateId } from './generateId';
+import { synced } from '@legendapp/state/sync';
 
-export const todos$ = observable<Record<string, Todo>>({});
+const pluginAsyncStorage = observablePersistAsyncStorage({
+    AsyncStorage,
+});
 
-// A sorted list of todos
+export const user$ = observable<{ id: string }>(
+    synced({
+        initial: {},
+        persist: {
+            plugin: pluginAsyncStorage,
+            name: 'user',
+        },
+    }),
+);
+
+when(syncState(user$).isPersistLoaded, () => {
+    if (!user$.id.peek()) {
+        user$.id.set(generateId());
+    }
+});
+
+export const todos$ = observable<Record<string, Todo>>(
+    synced({
+        initial: {},
+        persist: {
+            plugin: pluginAsyncStorage,
+            name: 'todos',
+        },
+    }),
+);
+
 export const todosSorted$ = observable<Todo[]>(() =>
     Object.values(todos$.get()).sort((A, B) => +A.createdAt - +B.createdAt),
 );
 
-// numIncompleteTodos$ helper
 export const numIncompleteTodos$ = observable(
     () => Object.values(todos$.get()).filter((todo) => !todo.completed).length,
 );
