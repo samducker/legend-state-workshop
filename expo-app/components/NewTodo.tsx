@@ -13,13 +13,11 @@ export const NewTodo = ({ idUser }: NewTodoProps) => {
 
     const addTodo = (text: string) => {
         const id = generateId();
-        todos$[id].set({
+        todos$[id].assign({
             id,
             text,
             idUser: idUser,
             completed: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
         } as Todo);
     };
 
