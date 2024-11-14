@@ -2,7 +2,7 @@ import { NewTodo } from '@/components/NewTodo';
 import { TodoList } from '@/components/TodoList';
 import { generateId } from '@/core/generateId';
 import { Todo } from '@/core/keelClient';
-import { useState } from 'react';
+import { useObservable, use$ } from '@legendapp/state/react';
 import { StyleSheet, Text, View } from 'react-native';
 
 interface TodosProps {
@@ -10,34 +10,15 @@ interface TodosProps {
 }
 
 export function Todos(props: TodosProps) {
-    const [todos, setTodos] = useState<Todo[]>([]);
-    const addTodo = (text: string) => {
-        setTodos([
-            ...todos,
-            {
-                id: generateId(),
-                text,
-                idUser: props.idUser,
-                completed: false,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            } as Todo,
-        ]);
-    };
-    const updateTodo = (todo: Todo) => {
-        setTodos(todos.map((t) => (t.id === todo.id ? todo : t)));
-    };
-    const deleteTodo = (id: string) => {
-        setTodos(todos.filter((t) => t.id !== id));
-    };
+    const todos$ = useObservable<Todo[]>([]);
 
     console.log('1 - Todos');
 
     return (
         <View>
             <Text style={styles.heading}>Todos</Text>
-            <NewTodo addTodo={addTodo} />
-            <TodoList todos={todos} updateTodo={updateTodo} deleteTodo={deleteTodo} />
+            <NewTodo idUser={props.idUser} todos$={todos$} />
+            <TodoList todos$={todos$} />
         </View>
     );
 }

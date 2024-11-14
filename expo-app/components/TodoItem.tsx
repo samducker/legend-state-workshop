@@ -1,27 +1,22 @@
 import { Todo } from '@/core/keelClient';
 import { Ionicons } from '@expo/vector-icons';
+import { Observable } from '@legendapp/state';
+import { use$ } from '@legendapp/state/react';
 import { Checkbox } from 'expo-checkbox';
 import { StyleSheet, TextInput, View } from 'react-native';
 
-export const TodoItem = ({
-    todo,
-    updateTodo,
-    deleteTodo,
-}: {
-    todo: Todo;
-    updateTodo: (todo: Todo) => void;
-    deleteTodo: (id: string) => void;
-}) => {
+export const TodoItem = ({ todo$ }: { todo$: Observable<Todo> }) => {
+    const todo = use$(todo$);
     const completed = todo.completed;
 
     const onToggle = () => {
-        updateTodo({ ...todo, completed: !todo.completed });
+        todo$.completed.set((completed) => !completed);
     };
     const onChangeText = (text: string) => {
-        updateTodo({ ...todo, text });
+        todo$.text.set(text);
     };
     const onPressDelete = () => {
-        deleteTodo(todo.id);
+        todo$.delete();
     };
 
     console.log('3 - TodoItem');

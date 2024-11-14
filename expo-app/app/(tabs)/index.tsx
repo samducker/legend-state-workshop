@@ -4,21 +4,23 @@ import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useObservable, use$ } from '@legendapp/state/react';
 
 export default function HomeScreen() {
     const { getItem, setItem } = useAsyncStorage('my_id');
-    const [id, setId] = useState<string | null>(null);
+    const id$ = useObservable<string | null>(null);
+    const id = use$(id$);
 
-    // get id from async storage or create it
     useMemo(() => {
         getItem().then((id) => {
-            if (id) {
-                setId(id);
-            } else {
+            if (!id) {
                 const newId = generateId();
+                id$.set(newId);
                 setItem(newId);
-                setId(newId);
+                return;
             }
+
+            id$.set(id);
         });
     }, []);
 

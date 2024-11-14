@@ -1,14 +1,30 @@
-import { useState } from 'react';
 import { NativeSyntheticEvent, StyleSheet, TextInput, TextInputSubmitEditingEventData } from 'react-native';
-
+import { useObservable, use$ } from '@legendapp/state/react';
+import { Observable } from '@legendapp/state';
+import { Todo } from '@/core/keelClient';
+import { generateId } from '@/core/generateId';
 interface NewTodoProps {
-    addTodo: (text: string) => void;
+    idUser: string;
+    todos$: Observable<Todo[]>;
 }
 
-export const NewTodo = ({ addTodo }: NewTodoProps) => {
-    const [text, setText] = useState('');
+export const NewTodo = ({ idUser, todos$ }: NewTodoProps) => {
+    const text$ = useObservable('');
+    const text = use$(text$);
+
+    function addTodo(text: string) {
+        todos$.push({
+            id: generateId(),
+            text,
+            completed: false,
+            deleted: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            idUser,
+        } as Todo);
+    }
     const handleSubmitEditing = ({ nativeEvent: { text } }: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {
-        setText('');
+        text$.set('');
         addTodo(text);
     };
 
@@ -17,7 +33,7 @@ export const NewTodo = ({ addTodo }: NewTodoProps) => {
     return (
         <TextInput
             value={text}
-            onChangeText={(text) => setText(text)}
+            onChangeText={(text) => text$.set(text)}
             onSubmitEditing={handleSubmitEditing}
             placeholder="What do you want to do?"
             style={styles.input}
