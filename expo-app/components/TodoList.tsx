@@ -1,13 +1,15 @@
 import { TodoItem } from '@/components/TodoItem';
-import { todos$, todosSorted$ } from '@/core/state';
+import { store$ } from '@/core/state';
 import { use$ } from '@legendapp/state/react';
 
-interface TodoListProps {}
+interface TodoListProps {
+    idUser: string;
+}
 
-export const TodoList = ({}: TodoListProps) => {
-    const todos = use$(todosSorted$, { shallow: true });
+export const TodoList = ({ idUser }: TodoListProps) => {
+    const todos = use$(store$.user[idUser].todosSorted, { shallow: true });
 
     console.log('2 - TodoList');
 
-    return todos.map((todo) => <TodoItem key={todo.id} todo$={todos$[todo.id]} />);
+    return todos.map((todo) => <TodoItem key={todo.id} todo$={store$.user[idUser].todos[todo.id]} />);
 };
