@@ -1,20 +1,14 @@
 import { Todo } from '@/core/keelClient';
 import { Observable } from '@legendapp/state';
-import { use$ } from '@legendapp/state/react';
+import { $, reactive } from '@legendapp/state/react';
 import { Ionicons } from '@expo/vector-icons';
 import { Checkbox } from 'expo-checkbox';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
+const ReactiveCheckbox = reactive(Checkbox, ['value'], {
+    value: { handler: 'onValueChange', getValue: (value: boolean) => value },
+});
 export const TodoItem = ({ todo$ }: { todo$: Observable<Todo> }) => {
-    const todo = use$(todo$);
-    const completed = todo.completed;
-
-    const onToggle = () => {
-        todo$.completed.set((completed) => !completed);
-    };
-    const onChangeText = (text: string) => {
-        todo$.text.set(text);
-    };
     const onPressDelete = () => {
         todo$.delete();
     };
@@ -22,17 +16,16 @@ export const TodoItem = ({ todo$ }: { todo$: Observable<Todo> }) => {
     console.log('3 - TodoItem');
 
     return (
-        <View style={[styles.todo, completed && styles.viewDone]}>
-            <TextInput
-                style={[styles.todoText, completed && styles.textDone]}
-                value={todo.text}
+        <$.View $style={() => [styles.todo, todo$.completed.get() && styles.viewDone]}>
+            <$.TextInput
+                $style={() => [styles.todoText, todo$.completed.get() && styles.viewDone]}
+                $value={todo$.text}
                 multiline
-                onChangeText={onChangeText}
                 blurOnSubmit
             />
-            <Checkbox value={todo.completed || false} style={styles.checkbox} onValueChange={onToggle} />
+            <ReactiveCheckbox value={todo$.completed} style={styles.checkbox} />
             <Ionicons name="trash" size={24} color="red" style={styles.deleteButton} onPress={onPressDelete} />
-        </View>
+        </$.View>
     );
 };
 
